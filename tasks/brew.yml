@@ -1,0 +1,65 @@
+- community.general.homebrew:
+    name: tldr
+    state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: cookiecutter
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: fd
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: fzf
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: gh
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: goto
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: jesseduffield/lazygit/lazygit
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: jq
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: poetry
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: ripgrep
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: tmux
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: yazi
+  	state: present
+  tags:
+    - install
+- community.general.homebrew:
+  	name: zoxide
+  	state: present
+  tags:
+    - install

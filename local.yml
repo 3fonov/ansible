@@ -1,0 +1,13 @@
+- hosts: localhost
+  vars:
+    source_key: "./.ssh/id_rsa"
+    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+  pre_tasks:
+  tasks:
+    - include: tasks/ssh.yml
+    - include: tasks/git-setup.yml
+    - include: tasks/zsh-setup.yml
+    - include: tasks/brew.yml
+    - include: tasks/nvim.yml
+    - include: tasks/dotfiles.yml
+

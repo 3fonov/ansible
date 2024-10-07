@@ -1,0 +1,12 @@
+- name: Remove neovim
+  shell: rm -rf ~/neovim
+  tags:
+    - install
+    - neovim
+- name: Install neovim
+  community.general.homebrew:
+    name: neovim
+    state: present
+  tags:
+    - install
+    - neovim
