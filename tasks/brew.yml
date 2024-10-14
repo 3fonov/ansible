@@ -4,62 +4,62 @@
   tags:
     - install
 - community.general.homebrew:
-  	name: cookiecutter
-  	state: present
+    name: cookiecutter
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: fd
-  	state: present
+    name: fd
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: fzf
-  	state: present
+    name: fzf
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: gh
-  	state: present
+    name: gh
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: goto
-  	state: present
+    name: goto
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: jesseduffield/lazygit/lazygit
-  	state: present
+    name: jesseduffield/lazygit/lazygit
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: jq
-  	state: present
+    name: jq
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: poetry
-  	state: present
+    name: poetry
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: ripgrep
-  	state: present
+    name: ripgrep
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: tmux
-  	state: present
+    name: tmux
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: yazi
-  	state: present
+    name: yazi
+    state: present
   tags:
     - install
 - community.general.homebrew:
-  	name: zoxide
-  	state: present
+    name: zoxide
+    state: present
   tags:
     - install
