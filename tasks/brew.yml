@@ -63,3 +63,13 @@
     state: present
   tags:
     - install
+- community.general.homebrew:
+    name: direnv
+    state: present
+  tags:
+    - install
+- community.general.homebrew:
+    name: ghostty
+    state: present
+  tags:
+    - install
