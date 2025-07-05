@@ -73,3 +73,23 @@
     state: present
   tags:
     - install
+- community.general.homebrew:
+    name: font-hack-nerd-font
+    state: present
+  tags:
+    - install
+- community.general.homebrew:
+    name: FelixKratz/formulae/borders
+    state: present
+  tags:
+    - install
+- community.general.homebrew:
+    name: FelixKratz/formulae/sketchybar
+    state: present
+  tags:
+    - install
+- community.general.homebrew:
+    name: nikitabobko/tap/aerospace
+    state: present
+  tags:
+    - install
