@@ -84,11 +84,6 @@
   tags:
     - install
 - community.general.homebrew:
-    name: FelixKratz/formulae/sketchybar
-    state: present
-  tags:
-    - install
-- community.general.homebrew:
     name: nikitabobko/tap/aerospace
     state: present
   tags:
