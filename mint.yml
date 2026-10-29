@@ -7,6 +7,7 @@
     dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
     dotfiles_installer: mint
     dotfiles_package_manager: apt
+    dotfiles_clone_with_gh: true
     # These tools may be absent from older Mint/Ubuntu repositories.
     mint_optional_packages:
       - tldr

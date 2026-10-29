@@ -1,0 +1,60 @@
+---
+- name: Install GitHub CLI for dotfiles access
+  become: true
+  ansible.builtin.apt:
+    name: gh
+    state: present
+
+- name: Check GitHub CLI authentication
+  ansible.builtin.command:
+    argv: [gh, auth, status, --hostname, github.com]
+  register: dotfiles_gh_auth
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Require GitHub CLI login
+  ansible.builtin.assert:
+    that: dotfiles_gh_auth.rc == 0
+    fail_msg: >-
+      Run 'gh auth login --hostname github.com --git-protocol https --web'
+      as your regular user, using an account with access to 3fonov/.dotfiles,
+      then rerun this playbook.
+
+- name: Configure Git to use GitHub CLI credentials
+  ansible.builtin.command:
+    argv: [gh, auth, setup-git, --hostname, github.com]
+  changed_when: false
+
+- name: Access dotfiles and submodules over HTTPS
+  # Rewrite SSH submodule URLs only for these commands, without global URL changes.
+  environment:
+    GIT_CONFIG_COUNT: '2'
+    GIT_CONFIG_KEY_0: url.https://github.com/.insteadOf
+    GIT_CONFIG_VALUE_0: 'git@github.com:'
+    GIT_CONFIG_KEY_1: url.https://github.com/.insteadOf
+    GIT_CONFIG_VALUE_1: 'ssh://git@github.com/'
+  block:
+    - name: Clone .dotfiles with gh
+      ansible.builtin.command:
+        argv:
+          - gh
+          - repo
+          - clone
+          - https://github.com/3fonov/.dotfiles.git
+          - "{{ lookup('env', 'HOME') }}/.dotfiles"
+          - '--'
+          - --branch
+          - master
+          - --recurse-submodules
+        creates: "{{ lookup('env', 'HOME') }}/.dotfiles/.git"
+      register: dotfiles_gh_clone
+
+    - name: Update existing dotfiles checkout and submodules
+      ansible.builtin.git:
+        repo: https://github.com/3fonov/.dotfiles.git
+        dest: "{{ lookup('env', 'HOME') }}/.dotfiles"
+        version: master
+        recursive: true
+        update: true
+      when: not dotfiles_gh_clone.changed

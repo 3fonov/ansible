@@ -25,6 +25,14 @@
     update: yes
     accept_hostkey: yes
     version: master
+  when: not (dotfiles_clone_with_gh | default(false))
+  tags:
+    - install
+    - dotfiles
+    - stow
+- name: Clone and update dotfiles using GitHub CLI authentication
+  ansible.builtin.import_tasks: dotfiles-gh.yml
+  when: dotfiles_clone_with_gh | default(false)
   tags:
     - install
     - dotfiles

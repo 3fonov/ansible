@@ -15,8 +15,19 @@ Run from this repository. The default SSH source files are `.ssh/id_rsa`
 and `.ssh/id_rsa.pub`; provide them before running. Omit `--ask-vault-pass`
 if the source key is not encrypted with Ansible Vault. Override paths with
 `-e source_key=/path/to/id_rsa -e dest_key=/home/you/.ssh/id_rsa`.
-The private `git@github.com:3fonov/.dotfiles.git` repository and its recursive
-submodules must be accessible using your SSH identity. The dotfiles branch
+Mint installs `gh` and uses GitHub CLI authentication over HTTPS for the private
+dotfiles repository and recursive submodules. Before the first run, authenticate:
+
+```sh
+sudo apt install gh
+gh auth login --hostname github.com --git-protocol https --web
+```
+
+Use an account with access to both `3fonov/.dotfiles` and
+`3fonov/.private_dotfiles`. The playbook configures GitHub CLI as Git's credential
+helper. It rewrites SSH submodule URLs to HTTPS for the dotfiles commands only.
+Existing checkouts are updated with Git using the same credentials.
+The macOS entry point retains SSH cloning. The dotfiles branch
 must contain the `mint` script (present in the local dotfiles checkout).
 
 `mint.yml` preserves the SSH → Git → Zsh → tools → Neovim → dotfiles order,
