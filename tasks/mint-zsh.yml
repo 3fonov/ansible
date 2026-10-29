@@ -13,12 +13,82 @@
     shell: /usr/bin/zsh
   tags: *zsh_tags
 
-- name: Install Oh-My-Zsh without an interactive installer
-  ansible.builtin.git:
-    repo: https://github.com/ohmyzsh/ohmyzsh.git
-    dest: "{{ lookup('env', 'HOME') }}/.oh-my-zsh"
-    depth: 1
-    update: false
+- name: Check for an installed Oh-My-Zsh framework
+  ansible.builtin.stat:
+    path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/oh-my-zsh.sh"
+  register: mint_oh_my_zsh
+  tags: *zsh_tags
+
+- name: Install missing Oh-My-Zsh framework files safely
+  when:
+    - not mint_oh_my_zsh.stat.exists
+    - not ansible_check_mode
+  tags: *zsh_tags
+  block:
+    - name: Create temporary framework checkout directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: ansible-oh-my-zsh-
+      register: mint_oh_my_zsh_temp
+
+    - name: Fetch Oh-My-Zsh into the temporary directory
+      ansible.builtin.git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: "{{ mint_oh_my_zsh_temp.path }}/framework"
+        depth: 1
+
+    - name: List framework files without Git metadata
+      ansible.builtin.find:
+        paths: "{{ mint_oh_my_zsh_temp.path }}/framework"
+        hidden: true
+        file_type: any
+        recurse: true
+        excludes: .git
+      register: mint_oh_my_zsh_files
+
+    - name: Ensure framework directory exists
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh"
+        state: directory
+        mode: '0755'
+
+    - name: Ensure framework subdirectories exist
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/{{ item.path | relpath(mint_oh_my_zsh_temp.path + '/framework') }}"
+        state: directory
+      loop: "{{ mint_oh_my_zsh_files.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      when:
+        - item.isdir
+        - "'/.git/' not in item.path"
+
+    - name: Copy missing framework files while preserving existing files
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/{{ item.path | relpath(mint_oh_my_zsh_temp.path + '/framework') }}"
+        remote_src: true
+        force: false
+        mode: preserve
+      loop: "{{ mint_oh_my_zsh_files.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      when:
+        - not item.isdir
+        - "'/.git/' not in item.path"
+  always:
+    - name: Remove temporary framework checkout
+      ansible.builtin.file:
+        path: "{{ mint_oh_my_zsh_temp.path }}"
+        state: absent
+      when: mint_oh_my_zsh_temp.path is defined
+
+- name: Preview missing framework installation
+  ansible.builtin.debug:
+    msg: Missing Oh-My-Zsh files would be installed without overwriting existing files.
+  when:
+    - not mint_oh_my_zsh.stat.exists
+    - ansible_check_mode
   tags: *zsh_tags
 
 - name: Install zsh-autosuggestions
