@@ -13,87 +13,24 @@
     shell: /usr/bin/zsh
   tags: *zsh_tags
 
-- name: Check for an installed Oh-My-Zsh framework
-  ansible.builtin.stat:
-    path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/oh-my-zsh.sh"
-  register: mint_oh_my_zsh
+- name: Install Oh-My-Zsh without overwriting existing files
+  ansible.builtin.include_tasks:
+    file: mint-zsh-component.yml
+    apply:
+      tags: [install, productivity, dotfiles, zsh]
+  vars:
+    mint_zsh_destination: "{{ lookup('env', 'HOME') }}/.oh-my-zsh"
+    mint_zsh_repository: https://github.com/ohmyzsh/ohmyzsh.git
+    mint_zsh_marker: oh-my-zsh.sh
   tags: *zsh_tags
 
-- name: Install missing Oh-My-Zsh framework files safely
-  when:
-    - not mint_oh_my_zsh.stat.exists
-    - not ansible_check_mode
-  tags: *zsh_tags
-  block:
-    - name: Create temporary framework checkout directory
-      ansible.builtin.tempfile:
-        state: directory
-        prefix: ansible-oh-my-zsh-
-      register: mint_oh_my_zsh_temp
-
-    - name: Fetch Oh-My-Zsh into the temporary directory
-      ansible.builtin.git:
-        repo: https://github.com/ohmyzsh/ohmyzsh.git
-        dest: "{{ mint_oh_my_zsh_temp.path }}/framework"
-        depth: 1
-
-    - name: List framework files without Git metadata
-      ansible.builtin.find:
-        paths: "{{ mint_oh_my_zsh_temp.path }}/framework"
-        hidden: true
-        file_type: any
-        recurse: true
-        excludes: .git
-      register: mint_oh_my_zsh_files
-
-    - name: Ensure framework directory exists
-      ansible.builtin.file:
-        path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh"
-        state: directory
-        mode: '0755'
-
-    - name: Ensure framework subdirectories exist
-      ansible.builtin.file:
-        path: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/{{ item.path | relpath(mint_oh_my_zsh_temp.path + '/framework') }}"
-        state: directory
-      loop: "{{ mint_oh_my_zsh_files.files }}"
-      loop_control:
-        label: "{{ item.path | basename }}"
-      when:
-        - item.isdir
-        - "'/.git/' not in item.path"
-
-    - name: Copy missing framework files while preserving existing files
-      ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/{{ item.path | relpath(mint_oh_my_zsh_temp.path + '/framework') }}"
-        remote_src: true
-        force: false
-        mode: preserve
-      loop: "{{ mint_oh_my_zsh_files.files }}"
-      loop_control:
-        label: "{{ item.path | basename }}"
-      when:
-        - not item.isdir
-        - "'/.git/' not in item.path"
-  always:
-    - name: Remove temporary framework checkout
-      ansible.builtin.file:
-        path: "{{ mint_oh_my_zsh_temp.path }}"
-        state: absent
-      when: mint_oh_my_zsh_temp.path is defined
-
-- name: Preview missing framework installation
-  ansible.builtin.debug:
-    msg: Missing Oh-My-Zsh files would be installed without overwriting existing files.
-  when:
-    - not mint_oh_my_zsh.stat.exists
-    - ansible_check_mode
-  tags: *zsh_tags
-
-- name: Install zsh-autosuggestions
-  ansible.builtin.git:
-    repo: https://github.com/zsh-users/zsh-autosuggestions.git
-    dest: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/plugins/zsh-autosuggestions"
-    update: false
+- name: Install zsh-autosuggestions without overwriting existing files
+  ansible.builtin.include_tasks:
+    file: mint-zsh-component.yml
+    apply:
+      tags: [install, productivity, dotfiles, zsh]
+  vars:
+    mint_zsh_destination: "{{ lookup('env', 'HOME') }}/.oh-my-zsh/plugins/zsh-autosuggestions"
+    mint_zsh_repository: https://github.com/zsh-users/zsh-autosuggestions.git
+    mint_zsh_marker: zsh-autosuggestions.zsh
   tags: *zsh_tags
