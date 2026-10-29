@@ -93,3 +93,8 @@
     state: present
   tags:
     - install
+- community.general.homebrew:
+    name: rclone
+    state: present
+  tags:
+    - install
