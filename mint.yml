@@ -1,0 +1,46 @@
+---
+- name: Configure a Linux Mint workstation
+  hosts: localhost
+  connection: local
+  vars:
+    source_key: "./.ssh/id_rsa"
+    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+    dotfiles_installer: mint
+    dotfiles_package_manager: apt
+    # These tools may be absent from older Mint/Ubuntu repositories.
+    mint_optional_packages:
+      - tldr
+      - cookiecutter
+      - gh
+      - python3-poetry
+      - zoxide
+      - lazygit
+      - yazi
+      - ghostty
+  pre_tasks:
+    - name: Require Linux Mint and a non-root invoking user
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] == 'Linux Mint'
+          - ansible_facts['user_id'] != 'root'
+        fail_msg: Run this playbook on Linux Mint as your regular user with --ask-become-pass.
+      tags: always
+
+    - name: Install prerequisites for shared tasks
+      become: true
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - git
+          - openssh-client
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      tags: always
+  tasks:
+    - import_tasks: tasks/ssh.yml
+    - import_tasks: tasks/git-setup.yml
+    - import_tasks: tasks/mint-zsh.yml
+    - import_tasks: tasks/apt.yml
+    - import_tasks: tasks/mint-nvim.yml
+    - import_tasks: tasks/dotfiles.yml

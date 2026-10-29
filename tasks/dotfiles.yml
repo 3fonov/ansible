@@ -2,6 +2,17 @@
   community.general.homebrew:
     name: stow
     state: present
+  when: (dotfiles_package_manager | default('homebrew')) == 'homebrew'
+  tags:
+    - install
+    - dotfiles
+    - stow
+- name: Installing stow with APT
+  become: true
+  ansible.builtin.apt:
+    name: stow
+    state: present
+  when: (dotfiles_package_manager | default('homebrew')) == 'apt'
   tags:
     - install
     - dotfiles
@@ -19,7 +30,10 @@
     - dotfiles
     - stow
 - name: Stow dotfiles
-  shell: cd $HOME/.dotfiles && ./mac
+  ansible.builtin.command:
+    argv:
+      - "./{{ dotfiles_installer | default('mac') }}"
+    chdir: "{{ lookup('env', 'HOME') }}/.dotfiles"
   tags:
     - install
     - dotfiles

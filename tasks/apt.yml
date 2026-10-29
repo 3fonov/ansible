@@ -1,0 +1,57 @@
+---
+- name: Install workstation tools from APT
+  become: true
+  ansible.builtin.apt:
+    name:
+      - fd-find
+      - fzf
+      - jq
+      - ripgrep
+      - tmux
+      - direnv
+      - rclone
+    state: present
+  tags: install
+
+- name: Check release-dependent APT packages
+  ansible.builtin.command:
+    argv: [apt-cache, policy, "{{ item }}"]
+  loop: "{{ mint_optional_packages }}"
+  register: mint_package_candidates
+  changed_when: false
+  check_mode: false
+  tags: install
+
+- name: Install available release-dependent APT packages
+  become: true
+  ansible.builtin.apt:
+    name: "{{ item.item }}"
+    state: present
+  loop: "{{ mint_package_candidates.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: "item.stdout is search('Candidate: (?!\\(none\\))\\S+')"
+  tags: install
+
+- name: Report tools unavailable from configured APT repositories
+  ansible.builtin.debug:
+    msg: "{{ item.item }} has no APT candidate on this host; skipped."
+  loop: "{{ mint_package_candidates.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: "not (item.stdout is search('Candidate: (?!\\(none\\))\\S+'))"
+  tags: install
+
+- name: Ensure user executable directory exists
+  ansible.builtin.file:
+    path: "{{ lookup('env', 'HOME') }}/.local/bin"
+    state: directory
+    mode: '0755'
+  tags: install
+
+- name: Expose fd-find using the Homebrew command name
+  ansible.builtin.file:
+    src: /usr/bin/fdfind
+    dest: "{{ lookup('env', 'HOME') }}/.local/bin/fd"
+    state: link
+  tags: install
